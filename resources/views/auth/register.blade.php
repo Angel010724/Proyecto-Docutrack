@@ -219,13 +219,6 @@
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="text-center mt-8">
-            <p class="text-white/50 text-xs">
-                © 2024 Tu Empresa. Todos los derechos reservados.
-            </p>
-        </div>
-    </div>
 
     <script>
         function togglePassword(fieldId) {
