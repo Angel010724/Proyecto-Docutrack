@@ -4,48 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Mostrar formulario de login
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
 
-    // Procesar login
-    public function login(Request $request)
-    {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
-
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
-            return redirect()->intended('dashboard'); // ✅ Ya redirige al dashboard
-        }
-
-        return back()->withErrors([
-            'email' => 'Credenciales inválidas.',
-        ]);
-    }
-
-    // Mostrar formulario de registro
-    public function showRegister()
-    {
-        return view('auth.register');
-    }
-
-    // Procesar registro
+    
     public function register(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:150',
+            'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'password' => 'required|string|min:6'
         ]);
 
         $user = User::create([
@@ -54,17 +25,19 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        Auth::login($user);
-
-        return redirect()->route('dashboard'); // ✅ Ya redirige al dashboard
+        return response()->json(['user' => $user], 201);
     }
 
-    // Cerrar sesión
-    public function logout(Request $request)
+    public function login(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return redirect()->route('login');
+        $credentials = $request->only('email', 'password');
+
+        if (!Auth::attempt($credentials)) {
+            return response()->json(['message' => 'Credenciales inválidas'], 401);
+        }
+
+        $user = Auth::user();
+
+        return response()->json(['user' => $user], 200);
     }
 }
